@@ -1,6 +1,6 @@
 # 하루 용사
 
-현실의 작은 행동을 일일퀘스트로 바꾸고, 완료 기록을 캘린더와 회고로 쌓는 생활형 자기관리 웹 앱 프로토타입입니다. 현재 버전은 Next.js App Router와 Supabase SSR 구조로 구성되어, DB가 준비되면 서버에서 seed 데이터를 읽고 DB가 비어 있어도 예시 데이터로 화면을 유지합니다.
+현실의 작은 행동을 일일퀘스트로 바꾸고, 완료 기록을 캘린더와 회고로 쌓는 생활형 자기관리 웹 앱 프로토타입입니다. 현재 버전은 Next.js App Router, Supabase SSR Auth, 계정별 RLS 구조로 구성되어, 로그인한 사용자별로 퀘스트 기록과 회고를 분리합니다.
 
 ## 실행
 
@@ -35,7 +35,8 @@ npm run qa
 DB 적용 순서:
 
 1. `supabase/migrations/202606140001_daily_yongsa_schema.sql`
-2. `supabase/seed.sql`
+2. `supabase/migrations/20260614135841_add_auth_scoped_daily_data.sql`
+3. `supabase/seed.sql`
 
 CLI가 있는 환경:
 
@@ -47,7 +48,14 @@ supabase db push
 supabase db execute --file supabase/seed.sql
 ```
 
-DB 적용 전에도 로컬 예시 데이터로 화면이 보입니다. DB 적용 후에는 서버 컴포넌트에서 Supabase 데이터를 읽어 일일퀘스트, 월간 캘린더, 주간 타임라인을 구성합니다.
+DB 적용 전에도 로그인 UI와 로컬 예시 데이터 fallback은 동작합니다. DB 적용 후에는 로그인한 계정의 `auth.uid()` 기준으로 일일퀘스트, 월간 캘린더, 주간 타임라인, 회고가 분리됩니다.
+
+## 인증
+
+- `/login`에서 이메일/비밀번호로 로그인 또는 가입합니다.
+- `/` 홈 화면은 로그인 필수이며, 미로그인 사용자는 `/login`으로 이동합니다.
+- 사이드바의 로그아웃 버튼은 현재 브라우저 세션만 종료합니다.
+- 새 계정은 첫 대시보드 진입 시 예시 월간 기록이 해당 `user_id` 소유 데이터로 생성됩니다.
 
 ## Vercel
 
@@ -70,4 +78,6 @@ npm run qa
 - 하루 회고
 - 월간 캘린더
 - 주간 타임라인
-- Supabase SSR 연동 및 로컬 seed fallback
+- Supabase SSR Auth
+- 계정별 RLS 데이터 분리
+- 로컬 seed fallback

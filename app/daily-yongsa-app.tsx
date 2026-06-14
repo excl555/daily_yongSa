@@ -1,6 +1,8 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { signOut } from '@/app/auth-actions';
+import { saveReflection, updateQuestCompletion } from '@/app/dashboard-actions';
 import {
   calculateProgress,
   getCalendarSummary,
@@ -37,7 +39,13 @@ const DATA_SOURCE_LABELS = {
   'supabase-error': '예시 데이터'
 };
 
-export function DailyYongsaApp({ initialState }: { initialState: DashboardState }) {
+export function DailyYongsaApp({
+  initialState,
+  userEmail
+}: {
+  initialState: DashboardState;
+  userEmail: string;
+}) {
   const [state, setState] = useState(initialState);
   const progress = useMemo(() => calculateProgress(state), [state]);
   const calendar = useMemo(() => getCalendarSummary(state), [state]);
@@ -71,10 +79,18 @@ export function DailyYongsaApp({ initialState }: { initialState: DashboardState 
         </nav>
 
         <div className="sidebar-card">
-          <span className="tag tag-purple">데모 상태</span>
+          <span className="tag tag-purple">로그인됨</span>
           <p>
             데이터: <strong data-data-source>{DATA_SOURCE_LABELS[state.dataSource as keyof typeof DATA_SOURCE_LABELS] || '예시 데이터'}</strong>
           </p>
+          <p>
+            계정: <strong>{userEmail}</strong>
+          </p>
+          <form action={signOut}>
+            <button className="logout-button" type="submit">
+              로그아웃
+            </button>
+          </form>
         </div>
       </aside>
 
@@ -151,7 +167,10 @@ export function DailyYongsaApp({ initialState }: { initialState: DashboardState 
                     className="quest-check"
                     type="button"
                     aria-label={`${quest.title} 완료 전환`}
-                    onClick={() => setState((current) => toggleQuest(current, quest.id))}
+                    onClick={() => {
+                      setState((current) => toggleQuest(current, quest.id));
+                      void updateQuestCompletion(quest.id, !quest.completed);
+                    }}
                   >
                     <Icon name={quest.completed ? 'check' : 'circle'} />
                   </button>
@@ -206,6 +225,9 @@ export function DailyYongsaApp({ initialState }: { initialState: DashboardState 
                 maxLength={180}
                 placeholder="오늘 가장 괜찮았던 장면을 한 줄로 남겨보세요."
                 onChange={(event) => setState((current) => ({ ...current, diary: event.target.value }))}
+                onBlur={(event) => {
+                  void saveReflection(event.target.value);
+                }}
               />
               <div className="diary-preview">
                 <span className="tag tag-peach">오늘의 한 줄</span>

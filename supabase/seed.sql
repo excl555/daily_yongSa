@@ -27,6 +27,10 @@ values
   ('mind', '하루 세이브', '자기 전 오늘의 장면 하나 기록하기', '모험심', 18, 'Hidden', 5)
 on conflict do nothing;
 
+delete from public.daily_quests where user_id is null;
+delete from public.daily_reflections where user_id is null;
+delete from public.daily_runs where user_id is null;
+
 insert into public.daily_runs (run_date, selected_goal, focus, title)
 values
   ('2026-06-01', 'health', '건강', '월요일 회복 루틴'),
@@ -48,11 +52,7 @@ values
   ('2026-06-21', 'home', '집안일', '주말 본진 정리'),
   ('2026-06-24', 'health', '건강', '체력 회복'),
   ('2026-06-27', 'mind', '모험', '랜덤 미션'),
-  ('2026-06-30', 'mind', '회고', '월말 정리')
-on conflict (run_date) do update
-set selected_goal = excluded.selected_goal,
-    focus = excluded.focus,
-    title = excluded.title;
+  ('2026-06-30', 'mind', '회고', '월말 정리');
 
 insert into public.daily_quests (run_id, run_date, goal_id, title, description, stat, exp, difficulty, completed, sort_order, completed_at)
 select r.id, r.run_date, q.goal_id, q.title, q.description, q.stat, q.exp, q.difficulty, q.completed, q.sort_order,
@@ -92,6 +92,4 @@ on conflict do nothing;
 insert into public.daily_reflections (run_date, content, mood)
 values
   ('2026-06-14', '아직 전부 끝내지는 못했지만 책상 정리와 감정 로그를 먼저 완료했다.', 'calm')
-on conflict (run_date) do update
-set content = excluded.content,
-    mood = excluded.mood;
+on conflict do nothing;
