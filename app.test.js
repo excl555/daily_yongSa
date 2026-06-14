@@ -1,6 +1,6 @@
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
-const {
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import {
   buildHistoryFromRows,
   calculateProgress,
   createInitialState,
@@ -10,7 +10,7 @@ const {
   randomizeQuests,
   selectGoal,
   toggleQuest
-} = require('./app.js');
+} from './lib/quest-domain.js';
 
 describe('daily quest prototype state', () => {
   it('starts with five health quests and no progress', () => {
