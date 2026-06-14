@@ -1,0 +1,9 @@
+{
+  "name": "daily-yongsa-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test",
+    "qa": "node --test && node scripts/smoke-static.js"
+  }
+}
