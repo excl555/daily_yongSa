@@ -4,6 +4,12 @@ import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 import { AUTH_MESSAGE_COOKIE } from '@/app/auth-message';
+import {
+  getAuthErrorMessage,
+  getSiteUrl,
+  validateCredentials,
+  validateSignupCredentials
+} from '@/lib/auth-domain';
 
 async function setAuthMessage(message: string) {
   const cookieStore = await cookies();
@@ -15,23 +21,11 @@ async function setAuthMessage(message: string) {
   });
 }
 
-function getCredentials(formData: FormData) {
-  const email = String(formData.get('email') || '').trim();
-  const password = String(formData.get('password') || '');
-
-  if (!email || !password) {
-    return { email, password, error: '이메일과 비밀번호를 모두 입력해주세요.' };
-  }
-
-  if (password.length < 6) {
-    return { email, password, error: '비밀번호는 최소 6자 이상이어야 합니다.' };
-  }
-
-  return { email, password, error: null };
-}
-
 export async function signIn(formData: FormData) {
-  const { email, password, error: validationError } = getCredentials(formData);
+  const { email, password, error: validationError } = validateCredentials({
+    email: formData.get('email'),
+    password: formData.get('password')
+  });
   if (validationError) {
     await setAuthMessage(validationError);
     redirect('/login');
@@ -41,7 +35,7 @@ export async function signIn(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    await setAuthMessage('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.');
+    await setAuthMessage(getAuthErrorMessage(error, 'signin'));
     redirect('/login');
   }
 
@@ -49,21 +43,31 @@ export async function signIn(formData: FormData) {
 }
 
 export async function signUp(formData: FormData) {
-  const { email, password, error: validationError } = getCredentials(formData);
+  const { email, password, error: validationError } = validateSignupCredentials({
+    email: formData.get('email'),
+    password: formData.get('password'),
+    passwordConfirm: formData.get('passwordConfirm')
+  });
   if (validationError) {
     await setAuthMessage(validationError);
     redirect('/signup');
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({ email, password });
+  const { error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: getSiteUrl()
+    }
+  });
 
   if (error) {
-    await setAuthMessage('가입에 실패했습니다. 이미 가입된 이메일일 수 있습니다.');
+    await setAuthMessage(getAuthErrorMessage(error, 'signup'));
     redirect('/signup');
   }
 
-  await setAuthMessage('가입 요청이 완료되었습니다. 이메일 확인이 필요하면 메일함을 확인한 뒤 로그인해주세요.');
+  await setAuthMessage('가입 요청이 완료되었습니다. 메일함의 인증 링크를 누른 뒤 로그인해주세요.');
   redirect('/login');
 }
 

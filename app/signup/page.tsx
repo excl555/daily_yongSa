@@ -45,6 +45,17 @@ export default async function SignupPage() {
             비밀번호
             <input name="password" type="password" autoComplete="new-password" minLength={6} placeholder="6자 이상" required />
           </label>
+          <label>
+            비밀번호 확인
+            <input
+              name="passwordConfirm"
+              type="password"
+              autoComplete="new-password"
+              minLength={6}
+              placeholder="비밀번호 다시 입력"
+              required
+            />
+          </label>
           <div className="auth-actions">
             <button formAction={signUp} type="submit">
               계정 만들기

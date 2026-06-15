@@ -9,6 +9,7 @@ const files = [
   'app/page.tsx',
   'app/login/page.tsx',
   'app/signup/page.tsx',
+  'app/auth/confirm/route.ts',
   'app/auth-actions.ts',
   'app/dashboard-actions.ts',
   'app/daily-yongsa-app.tsx',
@@ -30,6 +31,7 @@ const app = fs.readFileSync(path.join(root, 'app/daily-yongsa-app.tsx'), 'utf8')
 const auth = fs.readFileSync(path.join(root, 'app/auth-actions.ts'), 'utf8');
 const login = fs.readFileSync(path.join(root, 'app/login/page.tsx'), 'utf8');
 const signup = fs.readFileSync(path.join(root, 'app/signup/page.tsx'), 'utf8');
+const authConfirm = fs.readFileSync(path.join(root, 'app/auth/confirm/route.ts'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'app/globals.css'), 'utf8');
 const dashboard = fs.readFileSync(path.join(root, 'lib/supabase-dashboard.ts'), 'utf8');
 
@@ -50,9 +52,13 @@ const dashboard = fs.readFileSync(path.join(root, 'lib/supabase-dashboard.ts'), 
 assert.ok(auth.includes('signInWithPassword'), 'missing Supabase password sign in');
 assert.ok(auth.includes('AUTH_MESSAGE_COOKIE'), 'missing auth flash cookie');
 assert.ok(!auth.includes('/login?message='), 'auth actions should not leak messages in URLs');
+assert.ok(auth.includes('validateSignupCredentials'), 'missing signup password confirmation validation');
+assert.ok(auth.includes('emailRedirectTo'), 'missing email confirmation redirect');
 assert.ok(auth.includes('signOut'), 'missing Supabase sign out');
 assert.ok(login.includes('href="/signup"'), 'missing sign up route link');
 assert.ok(signup.includes('계정 만들기'), 'missing sign up page submit UI');
+assert.ok(signup.includes('name="passwordConfirm"'), 'missing password confirmation input');
+assert.ok(authConfirm.includes('verifyOtp'), 'missing auth confirmation token exchange');
 assert.ok(dashboard.includes("from('quest_templates')"), 'missing Supabase quest template query');
 assert.ok(dashboard.includes('ensureUserSeedData'), 'missing account seed setup');
 assert.ok(dashboard.includes('createInitialState()'), 'missing local seed fallback');
