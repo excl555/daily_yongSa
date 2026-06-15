@@ -836,7 +836,10 @@ h3 {
   margin-top: 4px;
 }
 
-.auth-actions button {
+.auth-actions button,
+.auth-link-button {
+  display: inline-grid;
+  place-items: center;
   min-height: 42px;
   border: 1px solid var(--ink);
   border-radius: 8px;
@@ -844,11 +847,20 @@ h3 {
   background: var(--ink);
   font-size: 14px;
   font-weight: 700;
+  text-align: center;
 }
 
-.auth-actions .secondary-button {
+.auth-actions .secondary-button,
+.auth-link-button {
   color: var(--ink);
   background: var(--canvas);
+}
+
+.auth-link-button:hover,
+.auth-link-button:focus-visible {
+  border-color: var(--ink);
+  background: var(--surface-soft);
+  outline: none;
 }
 
 @media (max-width: 960px) {
