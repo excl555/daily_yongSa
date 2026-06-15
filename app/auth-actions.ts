@@ -6,7 +6,7 @@ import { createClient } from '@/utils/supabase/server';
 import { AUTH_MESSAGE_COOKIE } from '@/app/auth-message';
 import {
   getAuthErrorMessage,
-  getSiteUrl,
+  getAuthCallbackUrl,
   validateCredentials,
   validateSignupCredentials
 } from '@/lib/auth-domain';
@@ -58,7 +58,7 @@ export async function signUp(formData: FormData) {
     email,
     password,
     options: {
-      emailRedirectTo: getSiteUrl()
+      emailRedirectTo: getAuthCallbackUrl()
     }
   });
 

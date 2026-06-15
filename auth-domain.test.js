@@ -2,6 +2,7 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   getAuthErrorMessage,
+  getAuthCallbackUrl,
   getSiteUrl,
   validateCredentials,
   validateSignupCredentials
@@ -53,6 +54,13 @@ describe('auth form rules', () => {
     assert.equal(getSiteUrl({ NEXT_PUBLIC_SITE_URL: 'https://daily-yong-sa.vercel.app' }), 'https://daily-yong-sa.vercel.app');
     assert.equal(getSiteUrl({ VERCEL_URL: 'preview.vercel.app' }), 'https://preview.vercel.app');
     assert.equal(getSiteUrl({}), 'http://localhost:3000');
+  });
+
+  it('uses the auth callback route for Supabase email verification redirects', () => {
+    assert.equal(
+      getAuthCallbackUrl({ NEXT_PUBLIC_SITE_URL: 'https://daily-yong-sa.vercel.app/' }),
+      'https://daily-yong-sa.vercel.app/auth/callback'
+    );
   });
 
   it('keeps login validation shared with signup', () => {
