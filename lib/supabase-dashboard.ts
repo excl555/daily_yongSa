@@ -56,25 +56,33 @@ export async function getDashboardState(userId?: string) {
         .limit(1) as unknown as Promise<QueryResult<Record<string, unknown>>>
     ]);
 
-    const questTemplates = {
-      ...cloneTemplateGroups(QUESTS_BY_GOAL),
-      ...mapQuestTemplateRows(templateResult.data)
-    };
+    const cleanTemplateRows = hasBrokenRows(templateResult.data, ['title', 'description', 'stat'])
+      ? []
+      : templateResult.data;
+    const cleanRunRows = hasBrokenRows(runResult.data, ['focus', 'title', 'selected_goal']) ? [] : runResult.data || [];
+    const cleanQuestRows = hasBrokenRows(questResult.data, ['title', 'description', 'stat']) ? [] : questResult.data || [];
+    const reflectionContent = String(reflectionResult.data?.[0]?.content || '');
+    const questTemplates = cleanTemplateRows.length
+      ? {
+          ...cloneTemplateGroups(QUESTS_BY_GOAL),
+          ...mapQuestTemplateRows(cleanTemplateRows)
+        }
+      : cloneTemplateGroups(QUESTS_BY_GOAL);
 
     const overrides: Record<string, unknown> = {
       questTemplates,
-      diary: String(reflectionResult.data?.[0]?.content || ''),
+      diary: hasBrokenText(reflectionContent) ? '' : reflectionContent,
       dataSource: runResult.error || questResult.error ? 'local-seed' : 'supabase'
     };
 
-    if (runResult.data?.length) {
-      overrides.history = buildHistoryFromRows(runResult.data, questResult.data || []);
+    if (cleanRunRows.length) {
+      overrides.history = buildHistoryFromRows(cleanRunRows, cleanQuestRows);
     }
 
-    const todayRun = runResult.data?.find((run) => run.run_date === TODAY);
-    const todayQuests = (questResult.data || []).filter((quest) => quest.run_date === TODAY);
+    const todayRun = cleanRunRows.find((run) => run.run_date === TODAY);
+    const todayQuests = cleanQuestRows.filter((quest) => quest.run_date === TODAY);
 
-    if (todayRun?.selected_goal) {
+    if (todayRun?.selected_goal && questTemplates[String(todayRun.selected_goal)]) {
       overrides.selectedGoal = String(todayRun.selected_goal);
     }
 
@@ -177,4 +185,12 @@ function getGoalForFocus(focus: string) {
   if (focus.includes('집안') || focus.includes('생활')) return 'home';
   if (focus.includes('관계')) return 'relation';
   return 'mind';
+}
+
+function hasBrokenRows(rows: Record<string, unknown>[] | null | undefined, fields: string[]) {
+  return Boolean(rows?.some((row) => fields.some((field) => hasBrokenText(row[field]))));
+}
+
+function hasBrokenText(value: unknown) {
+  return /[�]|ì|ë|ê|í|ðŸ|媛|몄|쬆|鍮|怨|듬|硫|泥/.test(String(value || ''));
 }

@@ -45,7 +45,16 @@ const dashboard = fs.readFileSync(path.join(root, 'lib/supabase-dashboard.ts'), 
 [
   'data-quests',
   'data-month-calendar',
-  'data-week-history'
+  'data-week-history',
+  'data-view="quests"',
+  'data-view="reflection"',
+  'data-view="growth"',
+  'data-booster',
+  'data-reflection-prompts',
+  'data-growth-report',
+  '오늘의 퀘스트',
+  '하루 회고',
+  '성장 리포트'
 ].forEach((hook) => assert.ok(app.includes(hook), `missing app hook: ${hook}`));
 
 assert.ok(auth.includes('signInWithPassword'), 'missing Supabase password sign in');

@@ -3,8 +3,11 @@ import assert from 'node:assert/strict';
 import {
   buildHistoryFromRows,
   calculateProgress,
+  calculateGrowthReport,
   createInitialState,
+  generateMonthlyBoosters,
   getCalendarSummary,
+  getTodayBooster,
   getWeekHistory,
   mapQuestTemplateRows,
   randomizeQuests,
@@ -24,7 +27,7 @@ describe('daily quest prototype state', () => {
   });
 
   it('toggles a quest and adds its exp to progress', () => {
-    const state = createInitialState();
+    const state = createInitialState({ monthlyBoosters: [] });
     const updated = toggleQuest(state, 'q-health-1');
     const progress = calculateProgress(updated);
 
@@ -55,7 +58,7 @@ describe('daily quest prototype state', () => {
   });
 
   it('adds stat gains from checked quests across different goals', () => {
-    const healthChecked = toggleQuest(createInitialState(), 'q-health-1');
+    const healthChecked = toggleQuest(createInitialState({ monthlyBoosters: [] }), 'q-health-1');
     const studyChecked = toggleQuest(selectGoal(healthChecked, 'study'), 'q-study-1');
     const progress = calculateProgress(studyChecked);
     const healthStat = healthChecked.questTemplates.health.find((quest) => quest.id === 'q-health-1').stat;
@@ -65,6 +68,41 @@ describe('daily quest prototype state', () => {
     assert.equal(progress.totalExp, 40);
     assert.equal(progress.statGains[healthStat], 3);
     assert.equal(progress.statGains[studyStat], 3);
+  });
+
+  it('creates ten monthly booster days across multiple goals', () => {
+    const boosters = generateMonthlyBoosters('2026-06');
+    const dates = new Set(boosters.map((booster) => booster.date));
+    const goals = new Set(boosters.map((booster) => booster.goalId));
+
+    assert.equal(boosters.length, 10);
+    assert.equal(dates.size, 10);
+    assert.ok(goals.size >= 4);
+    assert.equal(boosters.every((booster) => booster.bonusValue > 0), true);
+  });
+
+  it('adds booster bonus exp to today progress for matching goals', () => {
+    const state = createInitialState();
+    const booster = { date: '2026-06-14', goalId: 'health', bonusValue: 30, label: '건강 부스터' };
+    const updated = toggleQuest(state, 'q-health-1');
+    const progress = calculateProgress({ ...updated, monthlyBoosters: [booster] });
+
+    assert.equal(getTodayBooster([booster], '2026-06-14')?.goalId, 'health');
+    assert.equal(progress.baseExp, updated.questTemplates.health[0].exp);
+    assert.equal(progress.bonusExp, 6);
+    assert.equal(progress.totalExp, updated.questTemplates.health[0].exp + 6);
+  });
+
+  it('builds a growth report from history, stats, and boosters', () => {
+    const state = createInitialState({ monthlyBoosters: generateMonthlyBoosters('2026-06') });
+    const report = calculateGrowthReport(state);
+
+    assert.ok(report.monthlyExp > 0);
+    assert.ok(report.completionRate > 0);
+    assert.ok(report.bestStreak >= 1);
+    assert.ok(report.statCards.length >= 5);
+    assert.ok(report.boosterDays.length === 10);
+    assert.ok(report.playStyle.length > 0);
   });
 
   it('creates five randomized quests from multiple categories', () => {
