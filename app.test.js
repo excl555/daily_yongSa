@@ -33,14 +33,16 @@ describe('daily quest prototype state', () => {
     assert.equal(progress.totalExp, updated.quests[0].exp);
   });
 
-  it('shows no completed quests for a newly selected goal', () => {
+  it('keeps total progress visible when a newly selected goal has no checked quests', () => {
     const state = toggleQuest(createInitialState(), 'q-health-1');
     const updated = selectGoal(state, 'study');
     const progress = calculateProgress(updated);
 
     assert.equal(updated.selectedGoal, 'study');
     assert.match(updated.quests[0].id, /^q-study-/);
-    assert.equal(progress.completed, 0);
+    assert.equal(updated.quests.every((quest) => quest.completed === false), true);
+    assert.equal(progress.completed, 1);
+    assert.equal(progress.total, 25);
   });
 
   it('keeps checked quests when switching away from and back to a goal', () => {
@@ -50,6 +52,19 @@ describe('daily quest prototype state', () => {
 
     assert.equal(restoredHealth.quests.find((quest) => quest.id === 'q-health-1')?.completed, true);
     assert.equal(calculateProgress(restoredHealth).completed, 1);
+  });
+
+  it('adds stat gains from checked quests across different goals', () => {
+    const healthChecked = toggleQuest(createInitialState(), 'q-health-1');
+    const studyChecked = toggleQuest(selectGoal(healthChecked, 'study'), 'q-study-1');
+    const progress = calculateProgress(studyChecked);
+    const healthStat = healthChecked.questTemplates.health.find((quest) => quest.id === 'q-health-1').stat;
+    const studyStat = studyChecked.questTemplates.study.find((quest) => quest.id === 'q-study-1').stat;
+
+    assert.equal(progress.completed, 2);
+    assert.equal(progress.totalExp, 40);
+    assert.equal(progress.statGains[healthStat], 3);
+    assert.equal(progress.statGains[studyStat], 3);
   });
 
   it('creates five randomized quests from multiple categories', () => {
