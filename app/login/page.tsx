@@ -21,7 +21,7 @@ export default async function LoginPage() {
     <main className="auth-page">
       <section className="auth-panel">
         <div className="auth-brand">
-          <span className="brand-mark">勇</span>
+          <span className="brand-mark">하</span>
           <div>
             <strong>하루 용사</strong>
             <p>계정별 퀘스트 기록을 안전하게 분리합니다.</p>
@@ -31,7 +31,7 @@ export default async function LoginPage() {
         <div className="auth-copy">
           <span className="kicker">Account</span>
           <h1>로그인</h1>
-          <p>이메일 계정으로 접속하면 일일퀘스트, 회고, 캘린더 기록이 사용자별로 저장됩니다.</p>
+          <p>이메일 계정으로 접속하면 일일 퀘스트, 캘린더 기록, 진행 상태가 사용자별로 저장됩니다.</p>
         </div>
 
         {message ? <p className="auth-message">{message}</p> : null}
@@ -39,7 +39,7 @@ export default async function LoginPage() {
         <form className="auth-form">
           <label>
             이메일
-            <input name="email" type="email" autoComplete="email" placeholder="hero@example.com" required />
+            <input name="email" type="email" autoComplete="email" placeholder="okh8522@gmail.com" required />
           </label>
           <label>
             비밀번호

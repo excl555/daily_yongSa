@@ -7,6 +7,7 @@ import { AUTH_MESSAGE_COOKIE } from '@/app/auth-message';
 import {
   getAuthErrorMessage,
   getAuthCallbackUrl,
+  isExistingSignup,
   validateCredentials,
   validateSignupCredentials
 } from '@/lib/auth-domain';
@@ -54,7 +55,7 @@ export async function signUp(formData: FormData) {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -65,6 +66,11 @@ export async function signUp(formData: FormData) {
   if (error) {
     await setAuthMessage(getAuthErrorMessage(error, 'signup'));
     redirect('/signup');
+  }
+
+  if (isExistingSignup(data)) {
+    await setAuthMessage('이미 가입된 이메일입니다. 로그인해주세요.');
+    redirect('/login');
   }
 
   await setAuthMessage('가입 요청이 완료되었습니다. 메일함의 인증 링크를 누른 뒤 로그인해주세요.');

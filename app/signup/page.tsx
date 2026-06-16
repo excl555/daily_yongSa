@@ -21,7 +21,7 @@ export default async function SignupPage() {
     <main className="auth-page">
       <section className="auth-panel">
         <div className="auth-brand">
-          <span className="brand-mark">勇</span>
+          <span className="brand-mark">하</span>
           <div>
             <strong>하루 용사</strong>
             <p>새 계정을 만들고 나만의 퀘스트 기록을 시작합니다.</p>
@@ -31,7 +31,7 @@ export default async function SignupPage() {
         <div className="auth-copy">
           <span className="kicker">Account</span>
           <h1>새 계정 만들기</h1>
-          <p>이메일과 비밀번호를 입력하면 계정별 캘린더와 회고 기록이 분리되어 저장됩니다.</p>
+          <p>이메일과 비밀번호를 입력하면 인증 메일을 보냅니다. 이미 인증한 이메일이라면 로그인으로 이동해주세요.</p>
         </div>
 
         {message ? <p className="auth-message">{message}</p> : null}
@@ -39,7 +39,7 @@ export default async function SignupPage() {
         <form className="auth-form">
           <label>
             이메일
-            <input name="email" type="email" autoComplete="email" placeholder="hero@example.com" required />
+            <input name="email" type="email" autoComplete="email" placeholder="okh8522@gmail.com" required />
           </label>
           <label>
             비밀번호

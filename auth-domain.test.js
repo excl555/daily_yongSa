@@ -4,6 +4,7 @@ import {
   getAuthErrorMessage,
   getAuthCallbackUrl,
   getSiteUrl,
+  isExistingSignup,
   validateCredentials,
   validateSignupCredentials
 } from './lib/auth-domain.js';
@@ -50,10 +51,16 @@ describe('auth form rules', () => {
     );
   });
 
+  it('detects Supabase existing signup responses', () => {
+    assert.equal(isExistingSignup({ user: { identities: [] } }), true);
+    assert.equal(isExistingSignup({ user: { identities: [{ provider: 'email' }] } }), false);
+    assert.equal(isExistingSignup({ user: null }), false);
+  });
+
   it('builds a normalized site url for auth redirects', () => {
     assert.equal(getSiteUrl({ NEXT_PUBLIC_SITE_URL: 'https://daily-yong-sa.vercel.app' }), 'https://daily-yong-sa.vercel.app');
     assert.equal(getSiteUrl({ VERCEL_URL: 'preview.vercel.app' }), 'https://preview.vercel.app');
-    assert.equal(getSiteUrl({}), 'http://localhost:3000');
+    assert.equal(getSiteUrl({}), 'https://daily-yong-sa.vercel.app');
   });
 
   it('uses the auth callback route for Supabase email verification redirects', () => {

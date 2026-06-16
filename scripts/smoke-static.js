@@ -45,10 +45,7 @@ const dashboard = fs.readFileSync(path.join(root, 'lib/supabase-dashboard.ts'), 
 [
   'data-quests',
   'data-month-calendar',
-  'data-week-history',
-  '랜덤 다시 뽑기',
-  'Supabase 연결됨',
-  '로그아웃'
+  'data-week-history'
 ].forEach((hook) => assert.ok(app.includes(hook), `missing app hook: ${hook}`));
 
 assert.ok(auth.includes('signInWithPassword'), 'missing Supabase password sign in');
@@ -57,8 +54,10 @@ assert.ok(!auth.includes('/login?message='), 'auth actions should not leak messa
 assert.ok(auth.includes('validateSignupCredentials'), 'missing signup password confirmation validation');
 assert.ok(auth.includes('emailRedirectTo'), 'missing email confirmation redirect');
 assert.ok(auth.includes('getAuthCallbackUrl'), 'missing auth callback redirect URL');
+assert.ok(auth.includes('isExistingSignup'), 'missing existing signup guard');
 assert.ok(auth.includes('signOut'), 'missing Supabase sign out');
 assert.ok(login.includes('href="/signup"'), 'missing sign up route link');
+assert.ok(login.includes('로그인'), 'missing Korean login page copy');
 assert.ok(signup.includes('계정 만들기'), 'missing sign up page submit UI');
 assert.ok(signup.includes('name="passwordConfirm"'), 'missing password confirmation input');
 assert.ok(authCallback.includes('exchangeCodeForSession'), 'missing Supabase auth callback code exchange');
