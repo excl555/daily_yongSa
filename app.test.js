@@ -33,7 +33,7 @@ describe('daily quest prototype state', () => {
     assert.equal(progress.totalExp, updated.quests[0].exp);
   });
 
-  it('switches goals and resets quest completion', () => {
+  it('shows no completed quests for a newly selected goal', () => {
     const state = toggleQuest(createInitialState(), 'q-health-1');
     const updated = selectGoal(state, 'study');
     const progress = calculateProgress(updated);
@@ -41,6 +41,15 @@ describe('daily quest prototype state', () => {
     assert.equal(updated.selectedGoal, 'study');
     assert.match(updated.quests[0].id, /^q-study-/);
     assert.equal(progress.completed, 0);
+  });
+
+  it('keeps checked quests when switching away from and back to a goal', () => {
+    const checkedHealth = toggleQuest(createInitialState(), 'q-health-1');
+    const study = selectGoal(checkedHealth, 'study');
+    const restoredHealth = selectGoal(study, 'health');
+
+    assert.equal(restoredHealth.quests.find((quest) => quest.id === 'q-health-1')?.completed, true);
+    assert.equal(calculateProgress(restoredHealth).completed, 1);
   });
 
   it('creates five randomized quests from multiple categories', () => {
